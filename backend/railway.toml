@@ -1,13 +1,8 @@
 [build]
 builder = "nixpacks"
-
-[build.buildCommand]
-cmd = "npm install && node src/migrate.js"
+buildCommand = "npm install && node src/migrate.js"
 
 [deploy]
 startCommand = "npm start"
 healthcheckPath = "/health"
 restartPolicyType = "on_failure"
-
-[[services]]
-name = "passgo-api"
