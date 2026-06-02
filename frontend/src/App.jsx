@@ -2282,6 +2282,57 @@ const CalendarView = ({onSelect, events, onNav}) => {
   const weekDays = getWeekDays();
   const evOnDate = (dt) => events.filter(e=>{ const dd=new Date(e.date); return dd.toDateString()===dt.toDateString(); });
   const sortedEvents = [...events].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const monthView = calView==="month" ? (
+      <div style={{display:"grid",gridTemplateColumns:"1fr 250px",gap:20,alignItems:"start"}}>
+        <div className="card" style={{padding:22}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+            <button className="btn btn-white btn-sm" style={{padding:"5px 12px",fontSize:16}} onClick={()=>setCurr(new Date(yr,mo-1,1))}>‹</button>
+            <div style={{fontSize:16,fontWeight:800}}>{MONTHS[mo]} {yr}</div>
+            <button className="btn btn-white btn-sm" style={{padding:"5px 12px",fontSize:16}} onClick={()=>setCurr(new Date(yr,mo+1,1))}>›</button>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:3,marginBottom:5}}>
+            {["Do","Lu","Ma","Mi","Ju","Vi","Sa"].map(d=><div key={d} style={{textAlign:"center",fontSize:10,color:C.textMuted,padding:"3px 0",fontWeight:700}}>{d}</div>)}
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:3}}>
+            {Array.from({length:fd}).map((_,i)=><div key={`e${i}`}/>)}
+            {Array.from({length:days}).map((_,i)=>{
+              const day=i+1, evs=evOn(day);
+              const isToday=today.getDate()===day&&today.getMonth()===mo&&today.getFullYear()===yr;
+              const isSel=selDay===day;
+              return (
+                <div key={day} onClick={()=>setSelDay(isSel?null:day)} style={{
+                  aspectRatio:"1",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+                  borderRadius:9,fontSize:12,fontWeight:evs.length?800:400,cursor:"pointer",transition:"all .12s",gap:2,
+                  background:isSel?C.primary:isToday?C.primaryLt:"transparent",
+                  color:isSel?"#fff":isToday?C.primary:C.text
+                }}>
+                  <span>{day}</span>
+                  {evs.length>0&&<div style={{display:"flex",gap:2}}>{evs.slice(0,3).map((e,idx)=><div key={idx} style={{width:4,height:4,borderRadius:"50%",background:isSel?"#fff":e.color}}/>)}</div>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div>
+          <div style={{fontSize:11,fontWeight:800,color:C.textMuted,marginBottom:10,textTransform:"uppercase",letterSpacing:".08em"}}>
+            {selDay?`${selDay} de ${MONTHS[mo]}`:"Próximos eventos"}
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+            {(selDay?evOn(selDay):events.filter(e=>e.status!=="finished")).map(e=>(
+              <div key={e.id} className="card card-hov" style={{padding:14,cursor:"pointer"}} onClick={()=>onSelect(e)}>
+                <div style={{height:3,borderRadius:2,background:e.color,marginBottom:8}}/>
+                <div style={{fontSize:12,fontWeight:800,marginBottom:3,lineHeight:1.3}}>{e.title}</div>
+                <div style={{fontSize:11,color:C.textMuted}}>{e.speaker}</div>
+                <div style={{fontSize:11,color:C.textMuted,marginTop:4,display:"flex",gap:7}}>🕐 {e.time} <STag status={e.status}/></div>
+              </div>
+            ))}
+            {selDay&&evOn(selDay).length===0&&<div style={{color:C.textMuted,fontSize:12,textAlign:"center",padding:20}}>Sin eventos este día</div>}
+          </div>
+        </div>
+      </div>
+  ) : null;
+
+
   return (
     <div style={{padding:"18px 22px",maxWidth:960}} className="page-in">
       <Breadcrumbs items={[{label:"Dashboard",view:"dashboard"},{label:"Calendario"}]} onNav={onNav}/>
@@ -2371,54 +2422,7 @@ const CalendarView = ({onSelect, events, onNav}) => {
       )}
 
       {/* Month view */}
-      {calView==="month"&&<div style={{display:"grid",gridTemplateColumns:"1fr 250px",gap:20,alignItems:"start"}}>
-        <div className="card" style={{padding:22}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-            <button className="btn btn-white btn-sm" style={{padding:"5px 12px",fontSize:16}} onClick={()=>setCurr(new Date(yr,mo-1,1))}>‹</button>
-            <div style={{fontSize:16,fontWeight:800}}>{MONTHS[mo]} {yr}</div>
-            <button className="btn btn-white btn-sm" style={{padding:"5px 12px",fontSize:16}} onClick={()=>setCurr(new Date(yr,mo+1,1))}>›</button>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:3,marginBottom:5}}>
-            {["Do","Lu","Ma","Mi","Ju","Vi","Sa"].map(d=><div key={d} style={{textAlign:"center",fontSize:10,color:C.textMuted,padding:"3px 0",fontWeight:700}}>{d}</div>)}
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:3}}>
-            {Array.from({length:fd}).map((_,i)=><div key={`e${i}`}/>)}
-            {Array.from({length:days}).map((_,i)=>{
-              const day=i+1, evs=evOn(day);
-              const isToday=today.getDate()===day&&today.getMonth()===mo&&today.getFullYear()===yr;
-              const isSel=selDay===day;
-              return (
-                <div key={day} onClick={()=>setSelDay(isSel?null:day)} style={{
-                  aspectRatio:"1",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
-                  borderRadius:9,fontSize:12,fontWeight:evs.length?800:400,cursor:"pointer",transition:"all .12s",gap:2,
-                  background:isSel?C.primary:isToday?C.primaryLt:"transparent",
-                  color:isSel?"#fff":isToday?C.primary:C.text
-                }}>
-                  <span>{day}</span>
-                  {evs.length>0&&<div style={{display:"flex",gap:2}}>{evs.slice(0,3).map((e,idx)=><div key={idx} style={{width:4,height:4,borderRadius:"50%",background:isSel?"#fff":e.color}}/>)}</div>}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-        <div>
-          <div style={{fontSize:11,fontWeight:800,color:C.textMuted,marginBottom:10,textTransform:"uppercase",letterSpacing:".08em"}}>
-            {selDay?`${selDay} de ${MONTHS[mo]}`:"Próximos eventos"}
-          </div>
-          <div style={{display:"flex",flexDirection:"column",gap:8}}>
-            {(selDay?evOn(selDay):events.filter(e=>e.status!=="finished")).map(e=>(
-              <div key={e.id} className="card card-hov" style={{padding:14,cursor:"pointer"}} onClick={()=>onSelect(e)}>
-                <div style={{height:3,borderRadius:2,background:e.color,marginBottom:8}}/>
-                <div style={{fontSize:12,fontWeight:800,marginBottom:3,lineHeight:1.3}}>{e.title}</div>
-                <div style={{fontSize:11,color:C.textMuted}}>{e.speaker}</div>
-                <div style={{fontSize:11,color:C.textMuted,marginTop:4,display:"flex",gap:7}}>🕐 {e.time} <STag status={e.status}/></div>
-              </div>
-            ))}
-            {selDay&&evOn(selDay).length===0&&<div style={{color:C.textMuted,fontSize:12,textAlign:"center",padding:20}}>Sin eventos este día</div>}
-          </div>
-        </div>
-      </div>
-      </div> }
+      {monthView}
     </div>
   );
 };
@@ -3234,8 +3238,8 @@ const AdminView = ({users, setUsers, orgs, setOrgs, onNav}) => {
         </div>
       )}
 
-      {showUserModal&&<UserModal user={showUserModal==="new"?null:showUserModal} onSave={handleSaveUser} onClose={()=>setShowUserModal(null)}/>
-      {showOrgModal&&<OrgModal org={showOrgModal==="new"?null:showOrgModal} onSave={data=>{ setOrgs(o=>o.some(x=>x.id===data.id)?o.map(x=>x.id===data.id?data:x):[...o,data]); setShowOrgModal(null); }} onClose={()=>setShowOrgModal(null)}/>}}
+      {showUserModal&&<UserModal user={showUserModal==="new"?null:showUserModal} onSave={handleSaveUser} onClose={()=>setShowUserModal(null)}/>}
+      {showOrgModal&&<OrgModal org={showOrgModal==="new"?null:showOrgModal} onSave={data=>{ setOrgs(o=>o.some(x=>x.id===data.id)?o.map(x=>x.id===data.id?data:x):[...o,data]); setShowOrgModal(null); }} onClose={()=>setShowOrgModal(null)}/>}
     </div>
   );
 };
