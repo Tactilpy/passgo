@@ -945,9 +945,6 @@ const CertificatesView = ({events=INIT_EVENTS, participants=INIT_PARTICIPANTS, c
   const sendCert    = id => setIssued(prev=>prev.map(c=>c.id===id?{...c,sent:true}:c));
   const revokeCert  = id => { if(window.confirm("¿Revocar certificado?")) setIssued(prev=>prev.filter(c=>c.id!==id)); };
   const toggleSelPart = pid => setSelParts(prev=>prev.includes(pid)?prev.filter(x=>x!==pid):[...prev,pid]);
-  const sendCert    = id => setIssued(prev=>prev.map(c=>c.id===id?{...c,sent:true}:c));
-  const revokeCert  = id => { if(window.confirm("¿Revocar certificado?")) setIssued(prev=>prev.filter(c=>c.id!==id)); };
-  const toggleSelPart = pid => setSelParts(prev=>prev.includes(pid)?prev.filter(x=>x!==pid):[...prev,pid]);
 
   const CertPreview = ({attendee, scale=1}) => {
     const t=theme;
@@ -1246,7 +1243,7 @@ const CertificatesView = ({events=INIT_EVENTS, participants=INIT_PARTICIPANTS, c
               if(!issued.length){show("Sin certificados para exportar","error");return;}
               exportCSV(
                 issued.map(c=>({ID:c.certId,Participante:c.participantName,Email:c.email,Evento:c.eventName||"",Emitido:c.issuedAt,Aprobado:c.approved?"Sí":"No",Enviado:c.sent?"Sí":"No"})),
-                `certificados_${selEvent?.title?.replace(/[^a-zA-Z0-9]/g,"_")||"lote"}_${new Date().toISOString().slice(0,10)}.csv`
+                `certificados_${(selEvent?.title?.split(' ').join('_').replace(/[^a-zA-Z0-9_]/g,''))||'lote'}_${new Date().toISOString().slice(0,10)}.csv`
               );
               show(`${issued.length} certificados exportados`);
             }}>📦 Exportar lote CSV</button>
@@ -1838,7 +1835,7 @@ const EventsManager = ({onSelect, onRegister, onMetrics, onSurvey, onNav, events
 
   const handleCreate = () => {
     if(!validateNew()) return;
-    const slug = newForm.title.toLowerCase().replace(/\s+/g,"-").replace(/[^a-z0-9-]/g,"").slice(0,30)+"-"+Date.now().toString(36);
+    const slug = newForm.title.toLowerCase().split(' ').join('-').replace(/[^a-z0-9-]/g,'').slice(0,30)+"-"+Date.now().toString(36);
     const newEv = {
       ...newForm, id:Date.now(), slug, status:"upcoming",
       attendees:0, capacity:parseInt(newForm.capacity)||50,
@@ -2569,7 +2566,7 @@ const ReportsView = ({events, participants, checkins, onNav}) => {
               r.t==="Métodos de acceso"?CHECK_METHODS.map(m=>({Método:m.short,Accesos:checkins.filter(c=>c.method===m.id).length})):
               r.t==="Ingresos"?participants.map(p=>({Nombre:`${p.nombre} ${p.apellido}`,Estado:p.payStatus,Monto:p.payAmount||0})):
               events.map(e=>({Título:e.title,Tipo:e.type,Fecha:e.date,Estado:e.status,Asistentes:e.attendees})),
-              `reporte_${r.t.replace(/\s+/g,'_').toLowerCase()}.csv`
+              `reporte_${r.t.split(' ').join('_').toLowerCase()}.csv`
             )}>CSV</button>
             <button className="btn btn-white btn-sm" style={{flex:1,fontSize:10}} onClick={()=>printTable(
               r.t,['#','Nombre','Detalle'],
