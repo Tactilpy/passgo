@@ -131,21 +131,21 @@ const DEFAULT_SURVEY = [
 
 // ─── GLOBAL STYLES ────────────────────────────────────────────────────────────
 // ─── EXPORT UTILITIES ─────────────────────────────────────────────────────────
-const exportCSV = (data, filename='export.csv') => {
-  if(!data.length) return;
+const exportCSV = (data, filename) => {
+  if(!data||!data.length) return;
+  const fn = filename || 'export.csv';
   const headers = Object.keys(data[0]);
-  const csv = [
-    headers.join(','),
-    ...data.map(row => headers.map(h => {
-      const val = row[h]===null||row[h]===undefined?'':String(row[h]);
-      return val.includes(',') || val.includes('"') ? `"${val.replace(/"/g,'""')}"` : val;
-    }).join(','))
-  ].join('
-');
-  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'});
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url; a.download = filename; a.click();
+  const rows = data.map(function(row){
+    return headers.map(function(h){
+      var val = row[h]==null ? '' : String(row[h]);
+      return (val.indexOf(',')>=0||val.indexOf('"')>=0) ? '"'+val.replace(/"/g,'""')+'"' : val;
+    }).join(',');
+  });
+  const csv = [headers.join(',')].concat(rows).join(String.fromCharCode(10));
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = fn; a.click();
   URL.revokeObjectURL(url);
 };
 
