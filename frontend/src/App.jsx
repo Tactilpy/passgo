@@ -496,7 +496,7 @@ const FaceCapture = ({onCapture, size=170, liveRecognition=false}) => {
         {st==="done"&&<div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:C.tealLt,gap:8}}>
           <span style={{fontSize:38,animation:"bounceIn .4s"}}>✅</span>
           <span style={{fontSize:12,color:C.tealDk,fontWeight:700}}>Rostro registrado</span>
-        </div>}
+        </div> }
       </div>
       <div style={{display:"flex",gap:8,flexWrap:"wrap",justifyContent:"center"}}>
         {st==="idle"&&<button className="btn btn-primary btn-sm" onClick={startCamera}>📷 Activar cámara</button>}
@@ -992,7 +992,7 @@ const CertificatesView = ({events=INIT_EVENTS, participants=INIT_PARTICIPANTS, c
           <div style={{fontSize:16,fontWeight:800,color:t.accent,margin:"5px 0"}}>"{selEvent?.title}"</div>
           {certData.showDate&&<div style={{fontSize:11,color:t.accent,opacity:.65}}>
             {selEvent&&new Date(selEvent.date).toLocaleDateString("es-AR",{day:"numeric",month:"long",year:"numeric"})} · {selEvent?.location}
-          </div>}
+          </div> }
         </div>
 
         {certData.showHours&&(
@@ -2418,7 +2418,7 @@ const CalendarView = ({onSelect, events, onNav}) => {
           </div>
         </div>
       </div>
-      </div>}
+      </div> }
     </div>
   );
 };
